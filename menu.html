@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PETLINK</title>
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #dcdcdc;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  header {
+    background-color: #66c3d6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 30px;
+  }
+
+  header h1 {
+    color: white;
+    font-size: 24px;
+    margin: 0;
+  }
+
+  .search-container {
+    display: flex;
+    align-items: center;
+    background-color: white;
+    border-radius: 25px;
+    padding: 5px 15px;
+    box-shadow: 1px 1px 5px rgba(0,0,0,0.2);
+  }
+
+  .search-container input {
+    border: none;
+    outline: none;
+    font-size: 14px;
+    margin-left: 10px;
+    width: 180px;
+  }
+
+  nav {
+    display: flex;
+    justify-content: center;
+    background-color: #ccc;
+  }
+
+  nav button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    background-color: #ccc;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  nav button:hover {
+    background-color: #bbb;
+  }
+
+  .container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* BARRA LATERAL IZQUIERDA */
+  .filter-sidebar {
+    width: 240px;
+    background-color: #e6e6e6;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    overflow-y: auto;
+    position: absolute;
+    left: -260px;
+    top: 0;
+    height: 100%;
+    transition: left 0.3s ease;
+    z-index: 10;
+  }
+
+  .filter-sidebar.active {
+    left: 0;
+  }
+
+  .filters {
+    width: 100%;
+    background-color: #f6f6f6;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+
+  .filter-item {
+    padding: 12px 15px;
+    border-bottom: 1px solid #ccc;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .filter-item:last-child {
+    border-bottom: none;
+  }
+
+  .filter-item:hover {
+    background-color: #e0e0e0;
+  }
+
+  .filter-options {
+    display: none;
+    padding: 5px 20px 10px;
+    background-color: #f0f0f0;
+  }
+
+  .filter-options label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .filter-options input {
+    margin-right: 8px;
+  }
+
+  .main-content {
+    flex: 3;
+    background-color: #e6e6e6;
+    padding: 20px;
+    border-radius: 5px;
+    overflow-y: auto;
+    margin-left: 0;
+    transition: margin-left 0.3s ease;
+  }
+
+  .main-content.shifted {
+    margin-left: 240px;
+  }
+
+  .post {
+    background-color: #f2f2f2;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+
+  .post img {
+    width: 100%;
+    border-radius: 10px;
+    margin-top: 10px;
+  }
+
+  .sidebar {
+    flex: 1;
+    background-color: #e6e6e6;
+    padding: 20px;
+    border-radius: 5px;
+    text-align: center;
+  }
+
+  .perfil {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .perfil .foto {
+    width: 70px;
+    height: 70px;
+    background-color: white;
+    border-radius: 50%;
+    border: 1px solid gray;
+  }
+
+  .perfil p {
+    margin-top: 10px;
+    font-weight: bold;
+  }
+
+  .sidebar button {
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #ccc;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+
+  .sidebar button:hover {
+    background-color: #bbb;
+  }
+
+  .hidden {
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="search-container">
+    <span>🔍</span>
+    <input type="text" id="buscador" placeholder="Buscar mascotas...">
+  </div>
+  <h1>PETLINK</h1>
+</header>
+
+<nav>
+  <button>Inicio</button>
+  <button>Perreras</button>
+  <button>Usuarios</button>
+  <button>Sobre nosotros</button>
+</nav>
+
+<div class="container" id="mainContainer">
+
+  <!-- Barra lateral izquierda (oculta por defecto) -->
+  <div class="filter-sidebar" id="filterSidebar">
+    <div class="filters">
+      <div class="filter-item" onclick="toggleFilter('raza')">Raza</div>
+      <div id="raza" class="filter-options">
+        <label><input type="radio" name="raza" value="labrador"> Labrador</label>
+        <label><input type="radio" name="raza" value="poodle"> Poodle</label>
+        <label><input type="radio" name="raza" value="mestizo"> Mestizo</label>
+      </div>
+
+      <div class="filter-item" onclick="toggleFilter('edad')">Edad</div>
+      <div id="edad" class="filter-options">
+        <label><input type="radio" name="edad" value="cachorro"> Cachorro</label>
+        <label><input type="radio" name="edad" value="adulto"> Adulto</label>
+        <label><input type="radio" name="edad" value="mayor"> Mayor</label>
+      </div>
+
+      <div class="filter-item" onclick="toggleFilter('vacunas')">Vacunas</div>
+      <div id="vacunas" class="filter-options">
+        <label><input type="radio" name="vacunas" value="completas"> Completas</label>
+        <label><input type="radio" name="vacunas" value="incompletas"> Incompletas</label>
+      </div>
+
+      <div class="filter-item" onclick="toggleFilter('sexo')">Sexo</div>
+      <div id="sexo" class="filter-options">
+        <label><input type="radio" name="sexo" value="macho"> Macho</label>
+        <label><input type="radio" name="sexo" value="hembra"> Hembra</label>
+      </div>
+
+      <div class="filter-item" onclick="toggleFilter('antiguedad')">Antigüedad</div>
+      <div id="antiguedad" class="filter-options">
+        <label><input type="radio" name="antiguedad" value="reciente"> Reciente</label>
+        <label><input type="radio" name="antiguedad" value="antiguo"> Antiguo</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenido principal -->
+  <div class="main-content" id="publicaciones">
+    <div class="post" data-raza="labrador" data-edad="adulto" data-vacunas="completas" data-sexo="macho" data-antiguedad="reciente">
+      <b>Perrera patitas</b>
+      <p>Nueva familia unida.</p>
+      <img src="https://images.ctfassets.net/fdzk4n7nu51v/XfUzLhZ1iaNGEtxxLqfbw/8a2f83787619ebb9528fe00634871e5f/Un-hombre-acariciando-su-perro.jpeg?fm=webp&q=60">
+    </div>
+
+    <div class="post" data-raza="poodle" data-edad="cachorro" data-vacunas="completas" data-sexo="hembra" data-antiguedad="reciente">
+      <b>Refugio Esperanza</b>
+      <p>Adopta a Luna, una perrita muy cariñosa.</p>
+      <img src="https://i0.wp.com/loscaboshumanesociety.org/wp-content/uploads/2021/10/que-edad-tienen-mi-perrito-o-perrita.jpg?resize=393%2C262&ssl=1">
+    </div>
+
+    <div class="post" data-raza="mestizo" data-edad="mayor" data-vacunas="incompletas" data-sexo="macho" data-antiguedad="antiguo">
+      <b>Patitas Felices</b>
+      <p>Nuevo hogar para Max, adoptado por una familia maravillosa.</p>
+      <img src="https://c.files.bbci.co.uk/48DD/production/_107435681_perro1.jpg">
+    </div>
+  </div>
+
+  <!-- Barra lateral derecha -->
+  <div class="sidebar">
+    <div class="perfil">
+      <div class="foto"></div>
+      <p>Perfil</p>
+    </div>
+    <button>Configuración</button>
+    <button>Más</button>
+    <button>Salir</button>
+  </div>
+</div>
+
+<script>
+  const sidebar = document.getElementById("filterSidebar");
+  const mainContent = document.getElementById("publicaciones");
+  const buscador = document.getElementById("buscador");
+  const container = document.getElementById("mainContainer");
+
+  // Desplegar / ocultar barra al hacer clic en el buscador
+  buscador.addEventListener("focus", () => {
+    sidebar.classList.add("active");
+    mainContent.classList.add("shifted");
+  });
+
+  // Cerrar barra al hacer clic fuera
+  document.addEventListener("click", (e) => {
+    if (!sidebar.contains(e.target) && !buscador.contains(e.target)) {
+      sidebar.classList.remove("active");
+      mainContent.classList.remove("shifted");
+    }
+  });
+
+  // Mostrar/ocultar opciones dentro de la barra
+  function toggleFilter(id) {
+    const section = document.getElementById(id);
+    section.style.display = section.style.display === "block" ? "none" : "block";
+  }
+
+  // Filtrado dinámico por texto
+  const publicaciones = document.querySelectorAll(".post");
+  buscador.addEventListener("keyup", () => {
+    const texto = buscador.value.toLowerCase();
+    publicaciones.forEach(pub => {
+      const contenido = pub.textContent.toLowerCase();
+      pub.classList.toggle("hidden", !contenido.includes(texto));
+    });
+  });
+
+  // Filtrado por opciones de la barra
+  const filtros = document.querySelectorAll(".filter-options input");
+  filtros.forEach(filtro => {
+    filtro.addEventListener("change", () => {
+      const activos = {};
+      filtros.forEach(f => {
+        if (f.checked) activos[f.name] = f.value;
+      });
+
+      publicaciones.forEach(pub => {
+        let visible = true;
+        for (let key in activos) {
+          if (pub.dataset[key] !== activos[key]) visible = false;
+        }
+        pub.classList.toggle("hidden", !visible);
+      });
+    });
+  });
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
